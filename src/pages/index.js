@@ -56,15 +56,18 @@ export default function Home() {
     }
   };
 
-  const startCamera = async () => {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-      setStream(stream);
-      setCameraMode(true);
-    } catch (err) {
-      setError("Failed to access the camera.");
-    }
-  };
+ const startCamera = async () => {
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: "environment" }, // This ensures back camera is used
+    });
+    setStream(stream);
+    setCameraMode(true);
+  } catch (err) {
+    setError("Failed to access the camera.");
+  }
+};
+
 
   const captureImage = (videoRef) => {
     const canvas = document.createElement("canvas");
