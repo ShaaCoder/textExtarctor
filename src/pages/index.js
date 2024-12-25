@@ -23,16 +23,30 @@ export default function Home() {
       setError("Please upload a file first.");
       return;
     }
-
+  
     const fileExtension = file.name.split(".").pop().toLowerCase();
-
+  
     if (fileExtension === "pdf") {
-      // Handle PDF extraction logic here if you are planning to handle PDFs
-      setError("PDF extraction is not implemented yet.");
-      return;
-    }
-
-    if (fileExtension === "png" || fileExtension === "jpg" || fileExtension === "jpeg") {
+      // Handle PDF extraction using your /api/extract-text endpoint
+      const formData = new FormData();
+      formData.append("file", file);
+  
+      try {
+        const response = await fetch("/api/extract-text", {
+          method: "POST",
+          body: formData,
+        });
+  
+        if (!response.ok) {
+          throw new Error("Failed to extract text from PDF.");
+        }
+  
+        const data = await response.json();
+        setExtractedText(data.text); // Assuming the API returns a field 'text' containing the extracted text
+      } catch (err) {
+        setError("Failed to extract text from the PDF.");
+      }
+    } else if (fileExtension === "png" || fileExtension === "jpg" || fileExtension === "jpeg") {
       // Extract text from image using Tesseract.js
       try {
         const { data: { text } } = await Tesseract.recognize(file, "eng", {
@@ -43,9 +57,10 @@ export default function Home() {
         setError("Failed to extract text from the image.");
       }
     } else {
-      setError("Please upload a valid image file.");
+      setError("Please upload a valid image or PDF file.");
     }
   };
+  
 
   const handleCopyText = () => {
     if (extractedText) {
