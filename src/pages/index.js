@@ -28,7 +28,7 @@ export default function Home() {
     formData.append("file", file);
 
     try {
-      const res = await fetch("https://text-extarctor.vercel.app/api/extract-text", {
+      const res = await fetch("/api/extract-text", {
         method: "POST",
         body: formData,
       });
