@@ -24,23 +24,26 @@ export default function Home() {
       return;
     }
 
-    const formData = new FormData();
-    formData.append("file", file);
+    const fileExtension = file.name.split(".").pop().toLowerCase();
 
-    try {
-      const res = await fetch("/api/extract-text", {
-        method: "POST",
-        body: formData,
-      });
+    if (fileExtension === "pdf") {
+      // Handle PDF extraction logic here if you are planning to handle PDFs
+      setError("PDF extraction is not implemented yet.");
+      return;
+    }
 
-      if (!res.ok) {
-        throw new Error("Failed to extract text");
+    if (fileExtension === "png" || fileExtension === "jpg" || fileExtension === "jpeg") {
+      // Extract text from image using Tesseract.js
+      try {
+        const { data: { text } } = await Tesseract.recognize(file, "eng", {
+          logger: (m) => console.log(m), // Optional for logging progress
+        });
+        setExtractedText(text);
+      } catch (err) {
+        setError("Failed to extract text from the image.");
       }
-
-      const data = await res.json();
-      setExtractedText(data.text);
-    } catch (err) {
-      setError(err.message);
+    } else {
+      setError("Please upload a valid image file.");
     }
   };
 
@@ -107,7 +110,7 @@ export default function Home() {
         transition={{ duration: 0.5 }}
       >
         <label className="block text-xl font-medium text-white">
-          Upload a file (PDF or image):
+          Upload a file (Image or PDF):
         </label>
         <input
           type="file"
@@ -121,7 +124,7 @@ export default function Home() {
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
         >
-          <FaFilePdf className="inline-block mr-2" />
+          <FaImage className="inline-block mr-2" />
           Extract Text
         </motion.button>
         <motion.button
